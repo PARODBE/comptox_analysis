@@ -1,0 +1,24 @@
+name: toxtrust
+channels:
+  - default
+  - rdkit
+  - conda-forge
+dependencies:
+  - more-itertools
+  - pip
+  - python
+  - scikit-learn
+  - scipy
+  - setuptools
+  - requests
+  - flask
+  - flask_cors
+  - pyyaml
+  - pip:
+    - ipython
+    - matplotlib
+    - numpy
+    - pandas
+    - pyyaml
+    - xlsxwriter
+
