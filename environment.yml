@@ -7,13 +7,7 @@ dependencies:
   - more-itertools
   - pip
   - python
-  - scikit-learn
-  - scipy
-  - setuptools
-  - requests
-  - flask
-  - flask_cors
-  - pyyaml
+  - rdkit=2023.09.6
   - pip:
     - ipython
     - matplotlib
