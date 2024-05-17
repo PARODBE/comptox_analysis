@@ -16,5 +16,4 @@ setup(
     packages=find_packages(),
     # If any package contains *.txt or *.rst files, include them:
     # package_data={'': ['*.yaml', '*.yml']},
-    package_data={'Highlighting_atoms_rdkit': ['config.yaml']}
 )
