@@ -15,7 +15,4 @@ setup(
     author_email='parodbe@gmail.com',
     url='https://github.com/phi-grib/highlighter',
     download_url='https://github.com/phi-grib/highlighter.git',
-    packages=find_packages(),
-    # If any package contains *.txt or *.rst files, include them:
-    # package_data={'': ['*.yaml', '*.yml']},
-)
+    packages=find_packages())
