@@ -1,4 +1,4 @@
-name: toxtrust
+name: highlighter
 channels:
   - default
   - rdkit
