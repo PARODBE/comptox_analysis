@@ -2,6 +2,8 @@ from setuptools import setup, find_packages
 from setuptools.command.install import install
 from setuptools.command.develop import develop
 
+with open("README.md", 'r') as f:
+    long_description = f.read()
 
 setup(
     name='Highlighting_atoms_rdkit',
