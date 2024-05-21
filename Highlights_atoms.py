@@ -21,19 +21,17 @@ warnings.filterwarnings("ignore")
 
 class highlighter:
     
-    def __init__(self, smile:str=None):
+    def __init__(self, smile:List[str]=None):
         
         self.smile=smile
-        self.mol = Chem.MolFromSmiles(self.smile)
-        self.bi = {}
-        self.info_ex = []
-        self.smarts = []
-        self.hit_ats=[]
-        self.hit_bonds = []
-        self.hit_ats_list = []
-        self.hit_bonds_list = []
+        self.mol = [Chem.MolFromSmiles(sm) for sm in self.smile]
+        self.bi_list = []
+        self.info_ex_list=[]
+        self.smarts_list=[]
+        self.hit_ats_list_list = []
+        self.hit_bonds_list_list = []
     
-    def render_image(self, size:Tuple[int,int]=(600,600), indexes:bool=True) -> Image.Image:
+    def render_image(self, size:Tuple[int,int]=(600,600), indexes:bool=True, number:int=None) -> Image.Image:
         '''
         This function render your image.
         You have to introduce the smile of the compound that you want to render.
@@ -47,22 +45,28 @@ class highlighter:
         width, height = size
         d2d = rdMolDraw2D.MolDraw2DSVG(width, height)
         d2d.drawOptions().addAtomIndices = indexes
-        d2d.DrawMolecule(self.mol)
+        d2d.DrawMolecule(self.mol[number])
         d2d.FinishDrawing()
         return SVG(d2d.GetDrawingText())
 
-    def fragmentation(self, n: int = None) -> Tuple[Image.Image, Dict]:
+    def fragmentation(self, n: int = None , number:int = None) -> Tuple[Image.Image, Dict]:
         '''
         This function gives your molecular fragmentation
-        
+        ----
         Hyperparameters:
     
         n = Number of fragments
         '''
-        fp = rdMolDescriptors.GetMorganFingerprintAsBitVect(self.mol, radius=2, bitInfo=self.bi, useFeatures=True)
-        # show 10 of the set bits:
-        tpls = [(self.mol, x, self.bi) for x in fp.GetOnBits()]
-        return (Draw.DrawMorganBits(tpls[:n], molsPerRow=4, legends=[str(x) for x in fp.GetOnBits()][:n]), self.bi)
+        tpls_list=[]
+        for mol in self.mol:
+            bi = {}
+            fp = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol,radius=2, bitInfo=bi,useFeatures=True)
+            # show 10 of the set bits:
+            tpls = [(mol,x,bi) for x in fp.GetOnBits()]
+            self.bi_list.append(bi)
+            tpls_list.append(tpls)
+            
+        return (Draw.DrawMorganBits(tpls_list[number][:n], molsPerRow=4, legends=[str(x) for x in fp.GetOnBits()][:n]), self.bi_list)
 
     def getSubstructSmi(self,mol,atomID,radius):
         '''
@@ -109,77 +113,106 @@ class highlighter:
         '''
         This function allows to obtain fragmentation option accordint to a given fingerprint
         '''
-        
-        for bitId, atoms in self.bi.items():
-            exampleAtom, exampleRadius = atoms[0]
-            description = self.getSubstructSmi(self.mol, exampleAtom, exampleRadius)
-            self.info_ex.append((bitId, exampleRadius, description[0], description[1]))
 
-    def finger(self, fingerprint_numbers=None):
+        for bi,mol in zip(self.bi_list,self.mol):
+            info_ex=[]
+            for bitId, atoms in bi.items():
+                exampleAtom,exampleRadius = atoms[0]
+                description = getSubstructSmi(mol,exampleAtom,exampleRadius)
+                info_ex.append((bitId,exampleRadius,description[0],description[1]))
+            self.info_ex_list.append(info_ex)
 
+    def finger(self, fingerprint_numbers:List[int]=None):
         '''
         The result of previous function
-        '''
+        ----
+        Hyperparameters:
+
+        fingerprint_numbers: A list containing the fingerprint for each drug, such as: 1 drug [[5,6,7]], two drugs [[5,6,7],[20,55]]
         
-        self.smarts.clear()  # Borra todos los elementos existentes en la lista self.smarts
-        for fingerprint_number in fingerprint_numbers:
-            for i in self.info_ex:
-                if i[0] == fingerprint_number:
-                    smart = i[2]
-                    self.smarts.append(smart)
-        # return self.smarts
+        '''
+        self.smarts_list.clear()
+        for info_ex, fingerprint_number in zip(self.info_ex_list, fingerprint_numbers):
+            smarts = []
+            for finger in fingerprint_number:
+                for i in info_ex:
+                    if i[0] == finger:
+                        smart = i[2]
+                        smarts.append(smart)
+            self.smarts_list.append(smarts)
+        # return self.smarts_list
 
     def atom_bond(self):
-        
-        for smart in self.smarts:
-            patt = Chem.MolFromSmarts(smart)
-            self.hit_ats = list(self.mol.GetSubstructMatch(patt))
-            for bond in patt.GetBonds():
-                aid1 = self.hit_ats[bond.GetBeginAtomIdx()]
-                aid2 = self.hit_ats[bond.GetEndAtomIdx()]
-                self.hit_bonds.append(self.mol.GetBondBetweenAtoms(aid1, aid2).GetIdx())
-            self.hit_ats_list.append(self.hit_ats)
-            self.hit_bonds_list.append(self.hit_bonds)
-    
-        # return self.hit_ats_list, self.hit_bonds_list
 
-    def highlighting(self, colors=None):
-        result_dict_ats = defaultdict(list)
-        result_dict_bonds = defaultdict(list)
-    
-        if colors:
-            if len(self.hit_ats_list) == 1:
-                color = colors[0]
-                for bit in hit_ats_list[0]:
-                    result_dict_ats[bit].append(color)
-                for bit in hit_bonds_list[0]:
-                    result_dict_bonds[bit].append(color)
-            else:
-                for i, (hit_ats, hit_bonds) in enumerate(zip(self.hit_ats_list, self.hit_bonds_list)):
-                    color = colors[i % len(colors)]  # Usar el color correspondiente según el índice
-                    for bit in hit_ats:
-                        result_dict_ats[bit].append(color)
-                    for bit in hit_bonds:
-                        result_dict_bonds[bit].append(color)
-        else:
-            # Si no se proporcionan colores, usar el color por defecto (rojo)
+        '''
+        This function computes atoms and bonds from previous fingerprints
+        
+        '''
+
+        self.hit_ats_list_list.clear()
+        self.hit_bonds_list_list.clear()
+        for mol, smarts in zip(self.mol, self.smarts_list):
+            hit_ats_list = []
+            hit_bonds_list = []
+            for smart in smarts:
+                patt = Chem.MolFromSmarts(smart)
+                hit_ats = list(mol.GetSubstructMatch(patt))
+                hit_bonds = []
+                for bond in patt.GetBonds():
+                    aid1 = hit_ats[bond.GetBeginAtomIdx()]
+                    aid2 = hit_ats[bond.GetEndAtomIdx()]
+                    hit_bonds.append(mol.GetBondBetweenAtoms(aid1, aid2).GetIdx())
+                hit_ats_list.append(hit_ats)
+                hit_bonds_list.append(hit_bonds)
+            self.hit_ats_list_list.append(hit_ats_list)
+            self.hit_bonds_list_list.append(hit_bonds_list)
+            
+        # return self.hit_ats_list_list, self.hit_bonds_list_list
+
+    def highlighting(self)-> Image.Image:
+
+        '''
+        This function draws the selected fingerprint(s) for the selected compound(s)
+        
+        '''
+        
+        if len(self.mol) == 1:
+            result_dict_ats = defaultdict(list)
+            result_dict_bonds = defaultdict(list)
+            
             default_color = (1.0, 0.0, 0.0, 0.4)
-            for hit_ats, hit_bonds in zip(self.hit_ats_list, self.hit_bonds_list):
+            for hit_ats, hit_bonds in zip(self.hit_ats_list_list[0], self.hit_bonds_list_list[0]):
                 for bit in hit_ats:
                     if bit not in result_dict_ats:
                         result_dict_ats[bit].append(default_color)
                 for bit in hit_bonds:
                     if bit not in result_dict_bonds:
                         result_dict_bonds[bit].append(default_color)
-    
-        # Convertir el defaultdict a dict
-        result_ats = dict(result_dict_ats)
-        result_bonds = dict(result_dict_bonds)
-    
-        # Crear la imagen resaltada
-        d2d = rdMolDraw2D.MolDraw2DCairo(600, 600)
-        d2d.drawOptions().addAtomIndices = True
-        d2d.DrawMoleculeWithHighlights(self.mol, "", result_ats, result_bonds, {}, {})
-        d2d.FinishDrawing()
-        bio = io.BytesIO(d2d.GetDrawingText())
-        return Image.open(bio)
+
+            result_ats = dict(result_dict_ats)
+            result_bonds = dict(result_dict_bonds)
+            
+            d2d = rdMolDraw2D.MolDraw2DCairo(600, 600)
+            d2d.drawOptions().addAtomIndices = True
+            d2d.DrawMoleculeWithHighlights(self.mol[0], "", result_ats, result_bonds, {}, {})
+            d2d.FinishDrawing()
+            bio = io.BytesIO(d2d.GetDrawingText())
+            return Image.open(bio)
+        else:
+            default_color = (1.0, 0.0, 0.0, 0.4)
+            colors = [default_color] * len(self.mol)
+            
+            highlightAtomLists = []
+            highlightBondLists = []
+            for hit_ats_list, hit_bonds_list, color in zip(self.hit_ats_list_list, self.hit_bonds_list_list, colors):
+                result_dict_ats = defaultdict(list)
+                result_dict_bonds = defaultdict(list)
+                for hit_ats, hit_bonds in zip(hit_ats_list, hit_bonds_list):
+                    for bit in hit_ats:
+                        result_dict_ats[bit].append(color)
+                    for bit in hit_bonds:
+                        result_dict_bonds[bit].append(color)
+                highlightAtomLists.append(dict(result_dict_ats))
+                highlightBondLists.append(dict(result_dict_bonds))
+            
+            return Draw.MolsToGridImage(self.mol, highlightAtomLists=highlightAtomLists, highlightBondLists=highlightBondLists, subImgSize=(600,600))
