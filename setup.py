@@ -6,15 +6,15 @@ with open("README.md", 'r') as f:
     long_description = f.read()
 
 setup(
-    name='Highlighting_atoms_rdkit',
+    name='highlighter',
     version='0.1',
     description='Highlighting atoms function',
     license='GNU',
 #    long_description=long_description,
     author='Pablo Rodríguez Belenguer',
     author_email='parodbe@gmail.com',
-    url='https://github.com/phi-grib/Highlighting_atoms_rdkit',
-    download_url='https://github.com/phi-grib/Highlighting_atoms_rdkit.git',
+    url='https://github.com/phi-grib/highlighter',
+    download_url='https://github.com/phi-grib/highlighter.git',
     packages=find_packages(),
     # If any package contains *.txt or *.rst files, include them:
     # package_data={'': ['*.yaml', '*.yml']},
