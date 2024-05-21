@@ -17,17 +17,14 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-
-
 class highlighter:
     
     def __init__(self, smile:List[str]=None):
-        
-        self.smile=smile
+        self.smile = smile
         self.mol = [Chem.MolFromSmiles(sm) for sm in self.smile]
         self.bi_list = []
-        self.info_ex_list=[]
-        self.smarts_list=[]
+        self.info_ex_list = []
+        self.smarts_list = []
         self.hit_ats_list_list = []
         self.hit_bonds_list_list = []
     
@@ -49,7 +46,7 @@ class highlighter:
         d2d.FinishDrawing()
         return SVG(d2d.GetDrawingText())
 
-    def fragmentation(self, n: int = None , number:int = None) -> Tuple[Image.Image, Dict]:
+    def fragmentation(self, n: int = None, number: int = None) -> Tuple[Image.Image, Dict]:
         '''
         This function gives your molecular fragmentation
         ----
@@ -57,18 +54,18 @@ class highlighter:
     
         n = Number of fragments
         '''
-        tpls_list=[]
+        tpls_list = []
         for mol in self.mol:
             bi = {}
-            fp = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol,radius=2, bitInfo=bi,useFeatures=True)
+            fp = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, radius=2, bitInfo=bi, useFeatures=True)
             # show 10 of the set bits:
-            tpls = [(mol,x,bi) for x in fp.GetOnBits()]
+            tpls = [(mol, x, bi) for x in fp.GetOnBits()]
             self.bi_list.append(bi)
             tpls_list.append(tpls)
             
         return (Draw.DrawMorganBits(tpls_list[number][:n], molsPerRow=4, legends=[str(x) for x in fp.GetOnBits()][:n]), self.bi_list)
 
-    def getSubstructSmi(self,mol,atomID,radius):
+    def getSubstructSmi(self, mol, atomID, radius):
         '''
         This function gives your text information about molecular fragmentation
         
@@ -76,17 +73,17 @@ class highlighter:
         '''
 
         if radius > 0:
-            env = Chem.FindAtomEnvironmentOfRadiusN(self.mol, radius, atomID)
+            env = Chem.FindAtomEnvironmentOfRadiusN(mol, radius, atomID)
             atomsToUse = []
             for b in env:
-                atomsToUse.append(self.mol.GetBondWithIdx(b).GetBeginAtomIdx())
-                atomsToUse.append(self.mol.GetBondWithIdx(b).GetEndAtomIdx())
+                atomsToUse.append(mol.GetBondWithIdx(b).GetBeginAtomIdx())
+                atomsToUse.append(mol.GetBondWithIdx(b).GetEndAtomIdx())
             atomsToUse = list(set(atomsToUse))
         else:
             atomsToUse = [atomID]
             env = None
         symbols = []
-        for atom in self.mol.GetAtoms():
+        for atom in mol.GetAtoms():
             deg = atom.GetDegree()
             isInRing = atom.IsInRing()
             nHs = atom.GetTotalNumHs()
@@ -103,33 +100,29 @@ class highlighter:
             symbol += "]"
             symbols.append(symbol)
         
-        smi = Chem.MolFragmentToSmiles(self.mol, atomsToUse, bondsToUse=env, allHsExplicit=True, allBondsExplicit=True, rootedAtAtom=atomID)
-        smi2 = Chem.MolFragmentToSmiles(self.mol, atomsToUse, bondsToUse=env, atomSymbols=symbols, allBondsExplicit=True, rootedAtAtom=atomID)
+        smi = Chem.MolFragmentToSmiles(mol, atomsToUse, bondsToUse=env, allHsExplicit=True, allBondsExplicit=True, rootedAtAtom=atomID)
+        smi2 = Chem.MolFragmentToSmiles(mol, atomsToUse, bondsToUse=env, atomSymbols=symbols, allBondsExplicit=True, rootedAtAtom=atomID)
         
         return smi, smi2
     
-    def highlighting(self, fingerprint_numbers:List[int]=None)-> Image.Image:
-
+    def highlighting(self, fingerprint_numbers: List[int] = None) -> Image.Image:
         '''
         This function draws the selected fingerprint(s) for the selected compound(s)
-        
         '''
         for mol in self.mol:
             bi = {}
-            fp = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol,radius=2, bitInfo=bi,useFeatures=True)
+            fp = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, radius=2, bitInfo=bi, useFeatures=True)
             # show 10 of the set bits:
-            tpls = [(mol,x,bi) for x in fp.GetOnBits()]
             self.bi_list.append(bi)
             
-        for bi,mol in zip(self.bi_list,self.mol):
-            info_ex=[]
+        for bi, mol in zip(self.bi_list, self.mol):
+            info_ex = []
             for bitId, atoms in bi.items():
-                exampleAtom,exampleRadius = atoms[0]
-                description = getSubstructSmi(mol,exampleAtom,exampleRadius)
-                info_ex.append((bitId,exampleRadius,description[0],description[1]))
+                exampleAtom, exampleRadius = atoms[0]
+                description = self.getSubstructSmi(mol, exampleAtom, exampleRadius)
+                info_ex.append((bitId, exampleRadius, description[0], description[1]))
             self.info_ex_list.append(info_ex)
 
-        # self.smarts_list.clear()
         for info_ex, fingerprint_number in zip(self.info_ex_list, fingerprint_numbers):
             smarts = []
             for finger in fingerprint_number:
@@ -139,8 +132,6 @@ class highlighter:
                         smarts.append(smart)
             self.smarts_list.append(smarts)
 
-        # self.hit_ats_list_list.clear()
-        # self.hit_bonds_list_list.clear()
         for mol, smarts in zip(self.mol, self.smarts_list):
             hit_ats_list = []
             hit_bonds_list = []
