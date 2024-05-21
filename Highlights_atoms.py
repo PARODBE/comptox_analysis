@@ -107,13 +107,20 @@ class highlighter:
         smi2 = Chem.MolFragmentToSmiles(self.mol, atomsToUse, bondsToUse=env, atomSymbols=symbols, allBondsExplicit=True, rootedAtAtom=atomID)
         
         return smi, smi2
-
-    def get_smart(self):
+    
+    def highlighting(self, fingerprint_numbers:List[int]=None)-> Image.Image:
 
         '''
-        This function allows to obtain fragmentation option accordint to a given fingerprint
+        This function draws the selected fingerprint(s) for the selected compound(s)
+        
         '''
-
+        for mol in self.mol:
+            bi = {}
+            fp = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol,radius=2, bitInfo=bi,useFeatures=True)
+            # show 10 of the set bits:
+            tpls = [(mol,x,bi) for x in fp.GetOnBits()]
+            self.bi_list.append(bi)
+            
         for bi,mol in zip(self.bi_list,self.mol):
             info_ex=[]
             for bitId, atoms in bi.items():
@@ -122,16 +129,7 @@ class highlighter:
                 info_ex.append((bitId,exampleRadius,description[0],description[1]))
             self.info_ex_list.append(info_ex)
 
-    def finger(self, fingerprint_numbers:List[int]=None):
-        '''
-        The result of previous function
-        ----
-        Hyperparameters:
-
-        fingerprint_numbers: A list containing the fingerprint for each drug, such as: 1 drug [[5,6,7]], two drugs [[5,6,7],[20,55]]
-        
-        '''
-        self.smarts_list.clear()
+        # self.smarts_list.clear()
         for info_ex, fingerprint_number in zip(self.info_ex_list, fingerprint_numbers):
             smarts = []
             for finger in fingerprint_number:
@@ -140,17 +138,9 @@ class highlighter:
                         smart = i[2]
                         smarts.append(smart)
             self.smarts_list.append(smarts)
-        # return self.smarts_list
 
-    def atom_bond(self):
-
-        '''
-        This function computes atoms and bonds from previous fingerprints
-        
-        '''
-
-        self.hit_ats_list_list.clear()
-        self.hit_bonds_list_list.clear()
+        # self.hit_ats_list_list.clear()
+        # self.hit_bonds_list_list.clear()
         for mol, smarts in zip(self.mol, self.smarts_list):
             hit_ats_list = []
             hit_bonds_list = []
@@ -166,16 +156,7 @@ class highlighter:
                 hit_bonds_list.append(hit_bonds)
             self.hit_ats_list_list.append(hit_ats_list)
             self.hit_bonds_list_list.append(hit_bonds_list)
-            
-        # return self.hit_ats_list_list, self.hit_bonds_list_list
 
-    def highlighting(self)-> Image.Image:
-
-        '''
-        This function draws the selected fingerprint(s) for the selected compound(s)
-        
-        '''
-        
         if len(self.mol) == 1:
             result_dict_ats = defaultdict(list)
             result_dict_bonds = defaultdict(list)
