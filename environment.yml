@@ -1,4 +1,4 @@
-name: highlighter
+name: highlighting_atoms
 channels:
   - default
   - rdkit
