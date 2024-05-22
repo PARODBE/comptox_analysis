@@ -54,6 +54,8 @@ class highlighter:
     
         n = Number of fragments
         '''
+        # if len(self.mol)==1:
+
         tpls_list = []
         for mol in self.mol:
             bi = {}
@@ -63,7 +65,7 @@ class highlighter:
             self.bi_list.append(bi)
             tpls_list.append(tpls)
             
-        return (Draw.DrawMorganBits(tpls_list[number][:n], molsPerRow=4, legends=[str(x) for x in fp.GetOnBits()][:n]), self.bi_list)
+        return (Draw.DrawMorganBits(tpls_list[number][:n], molsPerRow=4, legends=[str(x) for x in fp.GetOnBits()][:n]), self.bi_list[number])
 
     def getSubstructSmi(self, mol, atomID, radius):
         '''
@@ -105,7 +107,7 @@ class highlighter:
         
         return smi, smi2
     
-    def highlighting(self, fingerprint_numbers: List[int] = None) -> Image.Image:
+    def highlighting(self, fingerprint_numbers: List[List[int]] = None) -> Image.Image:
         '''
         This function draws the selected fingerprint(s) for the selected compound(s)
         '''
