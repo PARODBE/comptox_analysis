@@ -6,7 +6,7 @@ with open("README.md", 'r') as f:
     long_description = f.read()
 
 setup(
-    name='highlighter',
+    name='highlighting_atoms',
     version='0.1',
     description='Highlighting atoms function',
     license='GNU',
@@ -14,6 +14,6 @@ setup(
     long_description_content_type='text/markdown',
     author='Pablo Rodríguez Belenguer',
     author_email='parodbe@gmail.com',
-    url='https://github.com/phi-grib/highlighter',
-    download_url='https://github.com/phi-grib/highlighter.git',
+    url='https://github.com/phi-grib/highlighting_atoms',
+    download_url='https://github.com/phi-grib/highlighting_atoms',
     packages=find_packages())
