@@ -3,3 +3,8 @@
 
 ### 
 ``highlighting-atoms`` is a python package in order to highglight the fingerprints that the user selects, which can be useful for example if you obtain the importance of the variables through a Machine Learning model.
+
+##### Install highlighting-atoms from PyPI
+```bash
+pip install highlighting-atoms
+```
