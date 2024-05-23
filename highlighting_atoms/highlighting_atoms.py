@@ -46,26 +46,54 @@ class highlighter:
         d2d.FinishDrawing()
         return SVG(d2d.GetDrawingText())
 
-    def fragmentation(self, n: int = None, number: int = None) -> Tuple[Image.Image, Dict]:
+    def fragmentation(self, type: str='morgan', hyper_finger : Dict = None, n: int = None, number: int = None) -> Tuple[Image.Image, Dict]:
         '''
         This function gives your molecular fragmentation
         ----
         Hyperparameters:
-    
-        n = Number of fragments
-        '''
-        # if len(self.mol)==1:
 
-        tpls_list = []
-        for mol in self.mol:
-            bi = {}
-            fp = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, radius=2, bitInfo=bi, useFeatures=True)
-            # show 10 of the set bits:
-            tpls = [(mol, x, bi) for x in fp.GetOnBits()]
-            self.bi_list.append(bi)
-            tpls_list.append(tpls)
+        type = morgan or rdkit
+        hyper_finger = A dictionary with the hyperparameters for building fps like radio or maxpath among others. Please review rdkit library for more information.
+        n = Number of fragments
+        number = Mol number, if you have only one, put 0
+        '''
+        if type == 'morgan':
+            tpls_list = []
+
+            for mol in self.mol:
+                bi = {}
+                if hyper_finger is None:
+                    fp = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, radius=2, bitInfo=bi, useFeatures=True)
+                else:
+                    fp = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, bitInfo=bi, **hyper_finger)
+
+                tpls = [(mol, x, bi) for x in fp.GetOnBits()]
+                self.bi_list.append(bi)
+                tpls_list.append(tpls)
+
+            img = Draw.DrawMorganBits(tpls_list[number][:n], molsPerRow=4, legends=[str(x) for x in fp.GetOnBits()][:n])
+            return (img, self.bi_list[number])
+
+        elif type == 'rdkit':
             
-        return (Draw.DrawMorganBits(tpls_list[number][:n], molsPerRow=4, legends=[str(x) for x in fp.GetOnBits()][:n]), self.bi_list[number])
+            tpls_list = []
+
+            for mol in self.mol:
+                rdkbi = {}
+                if hyper_finger is None:
+                    fp = Chem.RDKFingerprint(mol, maxPath=5, bitInfo=rdkbi)
+                else:
+                    fp = Chem.RDKFingerprint(mol, bitInfo=rdkbi, **hyper_finger)
+
+                tpls = [(mol, x, rdkbi) for x in rdkbi]
+                self.bi_list.append(rdkbi)
+                tpls_list.append(tpls)
+
+            if n is None or n > len(tpls_list[number]):
+                n = len(tpls_list[number])
+
+            img = Draw.DrawRDKitBits(tpls_list[number][:n], molsPerRow=4, legends=[str(x) for x in rdkbi][:n])
+            return (img, self.bi_list[number])
 
     def getSubstructSmi(self, mol, atomID, radius):
         '''
@@ -107,32 +135,91 @@ class highlighter:
         
         return smi, smi2
     
-    def highlighting(self, fingerprint_numbers: List[List[int]] = None) -> Image.Image:
+    def highlighting(self, type: str='morgan', hyper_finger : Dict = None, fingerprint_numbers: List[List[int]] = None) -> Image.Image:
         '''
         This function draws the selected fingerprint(s) for the selected compound(s)
-        '''
-        for mol in self.mol:
-            bi = {}
-            fp = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, radius=2, bitInfo=bi, useFeatures=True)
-            # show 10 of the set bits:
-            self.bi_list.append(bi)
-            
-        for bi, mol in zip(self.bi_list, self.mol):
-            info_ex = []
-            for bitId, atoms in bi.items():
-                exampleAtom, exampleRadius = atoms[0]
-                description = self.getSubstructSmi(mol, exampleAtom, exampleRadius)
-                info_ex.append((bitId, exampleRadius, description[0], description[1]))
-            self.info_ex_list.append(info_ex)
 
-        for info_ex, fingerprint_number in zip(self.info_ex_list, fingerprint_numbers):
-            smarts = []
-            for finger in fingerprint_number:
-                for i in info_ex:
-                    if i[0] == finger:
-                        smart = i[2]
-                        smarts.append(smart)
-            self.smarts_list.append(smarts)
+        Hyperparameters:
+
+        type = morgan or rdkit
+        hyper_finger = A dictionary with the hyperparameters for building fps like radio or maxpath among others. Please review rdkit library for more information.
+        fingerprint_numbers = A list of lists with the fingerprints that you want to highlight
+        '''
+
+        if type =='morgan':
+
+
+            for mol in self.mol:
+                
+                bi = {}
+                
+                if hyper_finger == None:
+                    
+                    fp = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, radius=2, bitInfo=bi, useFeatures=True)
+                    
+                else:
+                    
+                    fp = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, **hyper_finger, bitInfo=bi)
+                    
+                self.bi_list.append(bi)
+
+            for bi, mol in zip(self.bi_list, self.mol):
+                
+                info_ex = []
+                
+                for bitId, atoms in bi.items():
+                    
+                    exampleAtom, exampleRadius = atoms[0]
+                    description = self.getSubstructSmi(mol, exampleAtom, exampleRadius)
+                    info_ex.append((bitId, exampleRadius, description[0], description[1]))
+                    
+                self.info_ex_list.append(info_ex)
+    
+            for info_ex, fingerprint_number in zip(self.info_ex_list, fingerprint_numbers):
+                
+                smarts = []
+                for finger in fingerprint_number:
+                    
+                    for i in info_ex:
+                        if i[0] == finger:
+                            smart = i[2]
+                            smarts.append(smart)
+                self.smarts_list.append(smarts)
+        
+        elif type =='rdkit':
+            
+            for mol in self.mol:
+                
+                rdkbi = {}
+                
+                if hyper_finger == None:
+                    
+                    fp = Chem.RDKFingerprint(mol, maxPath=5, bitInfo=rdkbi)
+                    
+                else:
+                    
+                    fp = Chem.RDKFingerprint(mol, bitInfo=rdkbi, **hyper_finger)
+                    
+                self.bi_list.append(rdkbi)
+
+
+            for fp_indices, mol in zip(fingerprint_numbers, self.mol):# https://github.com/rdkit/rdkit/discussions/3579
+                
+                rdkbi = {}
+                
+                Chem.RDKFingerprint(mol, bitInfo=rdkbi)
+                mol_fragments = []
+                for fp_index in fp_indices:
+                    atoms = set()
+                    for bidx in rdkbi[fp_index][0]:
+                        atoms.add(mol.GetBondWithIdx(bidx).GetBeginAtomIdx())
+                        atoms.add(mol.GetBondWithIdx(bidx).GetEndAtomIdx())
+                    fragment_smiles = Chem.MolFragmentToSmiles(mol, atomsToUse=list(atoms), bondsToUse=rdkbi[fp_index][0])
+                
+                    mol_fragments.append(fragment_smiles)
+                # print(mol_fragments)
+            
+                self.smarts_list.append(mol_fragments)
 
         for mol, smarts in zip(self.mol, self.smarts_list):
             hit_ats_list = []
