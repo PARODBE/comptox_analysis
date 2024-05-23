@@ -28,10 +28,11 @@ highlighter_instance.render_image(number=0,indexes=False)
 
 highlighter_instance.fragmentation(n=10,number=0)[0] # [0] is to visualize the fragments and [1] to obtain the fragment dict.
 
+
+highlighter_instance.highlighting(type='morgan',fingerprint_numbers=[[707]]) #this is for one compound. You can specify the fp type and its hyperparameters
+
 #for multiple compounds
-highlighter_instance.highlighting(fingerprint_numbers=[[366,267]]) #this is for one compound
 
 highlighter_instance = highlighter(mols)
 
 highlighter_instance.highlighting(fingerprint_numbers=[[3,779],[3,779],[3,779],[3,779],[3,779]])
-```
