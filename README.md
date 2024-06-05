@@ -2,7 +2,8 @@
 [![License](https://img.shields.io/badge/license-GPLv3-blue)](https://img.shields.io/badge/license-GPLv3-blue)
 
 ### 
-``highlighting-atoms`` is a python package in order to highglight the fingerprints that the user selects, which can be useful for example if you obtain the importance of the variables through a Machine Learning model.
+In January 2024, I defended my doctoral thesis in computational toxicology, and since then, I have been contemplating how to contribute to the community with code that can simplify calculations needed according to the specific problem. Over these years, among many other things, I have worked on topics related to interpretability, visualization of chemical space, and combining the outputs of different models. In all cases, the problem was common: I often needed a lot of code for tasks that were part of my daily routine. That's why I decided to create ``comp_tox_analysis library``. In the case of visualizing the chemical space, if molecular descriptors are selected, a PCA will be represented and in the case of fingerprints, a t-SNE. Fingerprint highlighting is compatible with both morgan and rdkit fingerprints.
+
 
 ##### Install highlighting-atoms from PyPI
 ```bash
@@ -13,7 +14,42 @@ pip install highlighting-atoms
 
 ```python
 # Import library
-from highlighting_atoms.highlighting_atoms import highlighter
+from highlighting_atoms.visualizing import chemical_space_plotter
+from highlighting_atoms.ML_stacking import Stacking
+from highlighting_atoms.highlighting import highlighter
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+
+chemical_space_plotter('cox2_train.sdf').visualizer(type='morgan',ID_column='pchembl_value')
+
+models_params_data = {
+    'RandomForest': (RandomForestClassifier(random_state=42), 
+                     {'n_estimators': [50, 100], 'max_depth': [None, 10]}, 
+                     (X2_train, y2_train)),
+    'SVM': (SVC(probability=True, random_state=42), 
+            {'C': [0.1, 1, 10], 'kernel': ['linear', 'rbf']}, 
+            (X3_train, y3_train)),
+    'LogisticRegression': (LogisticRegression(random_state=42), 
+                           {'C': [0.1, 1, 10]}, 
+                           (X4_train, y4_train)),
+    'KNN': (KNeighborsClassifier(), 
+            {'n_neighbors': [3, 5, 7]}, 
+            (X5_train, y5_train))
+}
+
+# # Inicializar el modelo de Stacking
+stacking_model = Stacking(models_params_data=models_params_data).fit(X_test, y_test)
+
+params = {
+    'logical_rule': ['OR', 'AND', 'Majority']
+}
+
+# Realizar GridSearchCV en el modelo de Stacking
+grid_search_stacking = GridSearchCV(stacking_model, params, cv=5, scoring='accuracy')
+grid_search_stacking.fit(X_test, y_test)
 
 #for one compound
 mols=['CC(C)(C)NC(=O)[C@@H]1C[C@@H]2CCCC[C@@H]2CN1C[C@@H](O)[C@H](Cc1ccccc1)NC(=O)[C@H](CC(N)=O)NC(=O)c1ccc2ccccc2n1',
