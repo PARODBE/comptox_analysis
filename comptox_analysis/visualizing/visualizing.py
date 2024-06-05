@@ -10,7 +10,7 @@ from rdkit.Chem.Draw import rdMolDraw2D
 from rdkit.Chem.PandasTools import ChangeMoleculeRendering
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from highlighting_atoms.visualizing.predictable_tsne import PredictableTSNE
+from comptox_analysis.visualizing.predictable_tsne import PredictableTSNE
 from sklearn.manifold import TSNE
 from sklearn.neural_network import MLPRegressor
 from bokeh.plotting import figure, show, output_notebook, ColumnDataSource
