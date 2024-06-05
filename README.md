@@ -2,12 +2,12 @@
 [![License](https://img.shields.io/badge/license-GPLv3-blue)](https://img.shields.io/badge/license-GPLv3-blue)
 
 ### 
-In January 2024, I defended my doctoral thesis in computational toxicology, and since then, I have been contemplating how to contribute to the community with code that can simplify calculations needed according to the specific problem. Over these years, among many other things, I have worked on topics related to interpretability, visualization of chemical space, and combining the outputs of different models. In all cases, the problem was common: I often needed a lot of code for tasks that were part of my daily routine. That's why I decided to create ``comp_tox_analysis``. In the case of visualizing the chemical space, if molecular descriptors are selected, a PCA will be represented and in the case of fingerprints, a t-SNE. Fingerprint highlighting is compatible with both morgan and rdkit fingerprints.
+In January 2024, I defended my doctoral thesis in computational toxicology, and since then, I have been contemplating how to contribute to the community with code that can simplify calculations needed according to the specific problem. Over these years, among many other things, I have worked on topics related to interpretability, visualization of chemical space, and combining the outputs of different models. In all cases, the problem was common: I often needed a lot of code for tasks that were part of my daily routine. That's why I decided to create ``comptox_analysis``. In the case of visualizing the chemical space, if molecular descriptors are selected, a PCA will be represented and in the case of fingerprints, a t-SNE. Fingerprint highlighting is compatible with both morgan and rdkit fingerprints.
 
 
 ##### Install highlighting-atoms from PyPI
 ```bash
-pip install comp_tox_analysis
+pip install comptox_analysis
 ```
 
 ##### The following functions are available after installation:
