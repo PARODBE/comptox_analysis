@@ -6,14 +6,14 @@ with open("README.md", 'r') as f:
     long_description = f.read()
 
 setup(
-    name='highlighting_atoms',
+    name='comptox_analysis',
     version='0.5',
-    description='Highlighting atoms function',
+    description='ML analysis',
     license='GNU',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='Pablo Rodríguez Belenguer',
     author_email='parodbe@gmail.com',
-    url='https://github.com/phi-grib/highlighting_atoms',
-    download_url='https://github.com/phi-grib/highlighting_atoms',
+    url='https://github.com/phi-grib/comptox_analysis',
+    download_url='https://github.com/phi-grib/comptox_analysis',
     packages=find_packages())
