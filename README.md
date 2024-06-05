@@ -7,7 +7,7 @@ In January 2024, I defended my doctoral thesis in computational toxicology, and 
 
 ##### Install highlighting-atoms from PyPI
 ```bash
-pip install highlighting-atoms
+pip install comp_tox_analysis
 ```
 
 ##### The following functions are available after installation:
