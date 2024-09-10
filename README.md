@@ -81,7 +81,7 @@ highlighter_instance.highlighting(type='morgan',fingerprint_numbers=[[576,779]])
 ```
 
 <p align="center">
-  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/images/one_compound_highlighted.png" alt="Cover Page">
+  <img src="https://raw.githubusercontent.com/phi-grib/comptox_analysis/blob/main/images/one_compound_highlighted.png" alt="Cover Page">
 </p>
 
 ```python
