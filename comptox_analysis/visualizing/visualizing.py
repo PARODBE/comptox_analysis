@@ -22,6 +22,7 @@ from bokeh.plotting import figure, output_file, save
 from bokeh.palettes import RdBu3
 from itertools import cycle
 from bokeh.palettes import Category20
+from typing import Tuple, List, Dict
 
 class chemical_space_plotter:
     
@@ -83,7 +84,7 @@ class chemical_space_plotter:
         
         return colors
 
-    def visualizer(self,type = 'morgan', hyp_fp = {'radius':2, 'nBits':2048, 'useFeatures':True}, activity_column='Activity', ID_column=None):
+    def visualizer(self,type = 'morgan', hyp_fp : Dict = None, activity_column='Activity', ID_column=None):
 
         '''
         With this function you can visualize the chemical space of the selected dataframe. To complete this task you must select the type of
