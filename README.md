@@ -41,7 +41,7 @@ imp[:10].plot.bar();
 ```
 
 <p align="center">
-  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/importances.PNG" alt="Cover Page">
+  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/images/importances.PNG" alt="Cover Page">
 </p>
 
 ```python
@@ -59,7 +59,7 @@ highlighter_instance.render_image(number=1,indexes=False)
 ```
 
 <p align="center">
-  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/molecule_render.png" alt="Cover Page">
+  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/images/molecule_render.png" alt="Cover Page">
 </p>
 
 ```
