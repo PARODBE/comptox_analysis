@@ -69,7 +69,7 @@ highlighter_instance.fragmentation(n=26,number=1)[0]
 ```
 
 <p align="center">
-  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/fragments.PNG" alt="Cover Page">
+  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/images/fragments.PNG" alt="Cover Page">
 </p>
  
 ```
@@ -81,7 +81,7 @@ highlighter_instance.highlighting(type='morgan',fingerprint_numbers=[[576,779]])
 ```
 
 <p align="center">
-  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/one_compound_highlighted.png" alt="Cover Page">
+  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/images/one_compound_highlighted.png" alt="Cover Page">
 </p>
 
 ```
