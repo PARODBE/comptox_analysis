@@ -14,61 +14,86 @@ pip install comptox_analysis
 
 ```python
 # Import library
-from highlighting_atoms.visualizing import chemical_space_plotter
-from highlighting_atoms.ML_stacking import Stacking
-from highlighting_atoms.highlighting import highlighter
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
-from sklearn.linear_model import LogisticRegression
-from sklearn.neighbors import KNeighborsClassifier
+from comptox_analysis.highlighting.highlighting_atoms import highlighter
+from rdkit import Chem
+from rdkit.Chem import PandasTools
+from rdkit.Chem.AllChem import GetMorganFingerprintAsBitVect
+import numpy as np
+import pandas as pd
+from sklearn.ensemble import RandomForestRegressor
 
-chemical_space_plotter('cox2_train.sdf').visualizer(type='morgan',ID_column='pchembl_value')
+df=PandasTools.LoadSDF('caco2.sdf',smilesName='Smiles')
 
-models_params_data = {
-    'RandomForest': (RandomForestClassifier(random_state=42), 
-                     {'n_estimators': [50, 100], 'max_depth': [None, 10]}, 
-                     (X2_train, y2_train)),
-    'SVM': (SVC(probability=True, random_state=42), 
-            {'C': [0.1, 1, 10], 'kernel': ['linear', 'rbf']}, 
-            (X3_train, y3_train)),
-    'LogisticRegression': (LogisticRegression(random_state=42), 
-                           {'C': [0.1, 1, 10]}, 
-                           (X4_train, y4_train)),
-    'KNN': (KNeighborsClassifier(), 
-            {'n_neighbors': [3, 5, 7]}, 
-            (X5_train, y5_train))
-}
+def fingerprints_inputs2(dataframe):
+        X=np.array([GetMorganFingerprintAsBitVect(mol,radius=2,nBits=2048,useFeatures=True) for mol in [Chem.MolFromSmiles(m) for m in list(dataframe.Smiles)]])
+        y=dataframe.activity.astype('float')
+        return X,y
 
-# # Inicializar el modelo de Stacking
-stacking_model = Stacking(models_params_data=models_params_data).fit(X_test, y_test)
+X,y=fingerprints_inputs2(df)
 
-params = {
-    'logical_rule': ['OR', 'AND', 'Majority']
-}
+model=RandomForestRegressor(random_state=46).fit(X,y)
 
-# Realizar GridSearchCV en el modelo de Stacking
-grid_search_stacking = GridSearchCV(stacking_model, params, cv=5, scoring='accuracy')
-grid_search_stacking.fit(X_test, y_test)
+columns=[f'fp_{i}' for i in range(2048)]
 
-#for one compound
-mols=['CC(C)(C)NC(=O)[C@@H]1C[C@@H]2CCCC[C@@H]2CN1C[C@@H](O)[C@H](Cc1ccccc1)NC(=O)[C@H](CC(N)=O)NC(=O)c1ccc2ccccc2n1',
- 'C/C=C/C[C@@H](C)[C@@H](O)[C@H]1C(=O)N[C@@H](CC)C(=O)N(C)CC(=O)N(C)[C@@H](CC(C)C)C(=O)N[C@@H](C(C)C)C(=O)N(C)[C@@H](CC(C)C)C(=O)N[C@@H](C)C(=O)N[C@H](C)C(=O)N(C)[C@@H](CC(C)C)C(=O)N(C)[C@@H](CC(C)C)C(=O)N(C)[C@@H](C(C)C)C(=O)N1C',
- 'CC1(C)S[C@@H]2[C@H](NC(=O)[C@H](N)c3ccc(O)cc3)C(=O)N2[C@H]1C(=O)O',
- 'CC(C)(C)S(=O)(=O)C[C@@H](Cc1ccccc1)C(=O)N[C@@H](Cc1c[nH]cn1)C(=O)N[C@@H](CC1CCCCC1)[C@@H](O)[C@@H](O)C1CC1',
- 'O=C(N[C@H](CO)[C@H](O)c1ccc([N+](=O)[O-])cc1)C(Cl)Cl']
+imp=pd.Series(data=model.feature_importances_,index=columns).sort_values(ascending=False)
+imp[:10].plot.bar();
 
-highlighter_instance = highlighter([mols[0]]) #this is for one compound
+```
 
-highlighter_instance.render_image(number=0,indexes=False)
+<p align="center">
+  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/importances.png" alt="Cover Page">
+</p>
 
-highlighter_instance.fragmentation(n=10,number=0)[0] # [0] is to visualize the fragments and [1] to obtain the fragment dict.
+```python
 
+df_fp=pd.DataFrame(X,columns=columns)
 
-highlighter_instance.highlighting(type='morgan',fingerprint_numbers=[[707]]) #this is for one compound. You can specify the fp type and its hyperparameters
+indexes=df_fp[(df_fp.fp_576==1)&(df_fp.fp_779==1)].index.values
+
+mols=df.loc[indexes,'Smiles'].tolist()
+
+highlighter_instance=highlighter(mols)
+
+highlighter_instance.render_image(number=1,indexes=False)
+
+```
+
+<p align="center">
+  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/molecule_render.png" alt="Cover Page">
+</p>
+
+```
+
+highlighter_instance.fragmentation(n=26,number=1)[0]
+
+```
+
+<p align="center">
+  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/fragments.png" alt="Cover Page">
+</p>
+ 
+```
+
+highlighter_instance = highlighter([mols[1]])
+
+highlighter_instance.highlighting(type='morgan',fingerprint_numbers=[[576,779]])
+
+```
+
+<p align="center">
+  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/one_compound_highlighted.png" alt="Cover Page">
+</p>
+
+```
 
 #for multiple compounds
 
 highlighter_instance = highlighter(mols)
 
-highlighter_instance.highlighting(fingerprint_numbers=[[3,779],[3,779],[3,779],[3,779],[3,779]])
+highlighter_instance.highlighting(fingerprint_numbers=[[576,779],[576,779],[576,779]])
+
+```
+
+<p align="center">
+  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/multiple_highlighted.png" alt="Cover Page">
+</p>
