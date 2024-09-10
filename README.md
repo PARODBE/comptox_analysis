@@ -69,7 +69,7 @@ highlighter_instance.fragmentation(n=26,number=1)[0]
 ```
 
 <p align="center">
-  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/fragments.png" alt="Cover Page">
+  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/fragments.PNG" alt="Cover Page">
 </p>
  
 ```
