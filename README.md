@@ -95,5 +95,6 @@ highlighter_instance.highlighting(fingerprint_numbers=[[576,779],[576,779],[576,
 ```
 
 <p align="center">
-  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/multiple_highlighted.png" alt="Cover Page">
+  <img src="[https://github.com/phi-grib/comptox_analysis/blob/main/multiple_highlighted.png](https://raw.githubusercontent.com/phi-grib/comptox_analysis/main/images/multiple_highlighted.PNG
+)" alt="Cover Page">
 </p>
