@@ -62,7 +62,7 @@ highlighter_instance.render_image(number=1,indexes=False)
   <img src="https://github.com/phi-grib/comptox_analysis/blob/main/images/molecule_render.PNG" alt="Cover Page">
 </p>
 
-```
+```python
 
 highlighter_instance.fragmentation(n=26,number=1)[0]
 
@@ -72,7 +72,7 @@ highlighter_instance.fragmentation(n=26,number=1)[0]
   <img src="https://github.com/phi-grib/comptox_analysis/blob/main/images/fragments.PNG" alt="Cover Page">
 </p>
  
-```
+```python
 
 highlighter_instance = highlighter([mols[1]])
 
@@ -84,7 +84,7 @@ highlighter_instance.highlighting(type='morgan',fingerprint_numbers=[[576,779]])
   <img src="https://github.com/phi-grib/comptox_analysis/blob/main/images/one_compound_highlighted.png" alt="Cover Page">
 </p>
 
-```
+```python
 
 #for multiple compounds
 
