@@ -41,7 +41,7 @@ imp[:10].plot.bar();
 ```
 
 <p align="center">
-  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/importances.png" alt="Cover Page">
+  <img src="https://github.com/phi-grib/comptox_analysis/blob/main/importances.PNG" alt="Cover Page">
 </p>
 
 ```python
