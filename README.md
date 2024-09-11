@@ -7,7 +7,7 @@ In January 2024, I defended my doctoral thesis in computational toxicology, and 
 
 # Installation
 
-adasd
+## Dependencies
 
 
 
