@@ -88,7 +88,7 @@ highlighter_instance.highlighting(type='morgan',fingerprint_numbers=[[576,779]])
 ```
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/phi-grib/comptox_analysis/main/images/one_compound_highlighted.PNG" alt="Cover Page">
+  <img src="https://raw.githubusercontent.com/phi-grib/comptox_analysis/main/images/one_compound_highl..PNG" alt="Cover Page">
 </p>
 
 ##### Also, it is possible to highlight multiple compounds:
@@ -104,5 +104,5 @@ highlighter_instance.highlighting(fingerprint_numbers=[[576,779],[576,779],[576,
 ```
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/phi-grib/comptox_analysis/main/images/multiple_highlighted.PNG" alt="Cover Page">
+  <img src="https://raw.githubusercontent.com/phi-grib/comptox_analysis/main/images/multiple_highl..PNG" alt="Cover Page">
 </p>
