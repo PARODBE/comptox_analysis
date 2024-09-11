@@ -41,7 +41,7 @@ imp[:10].plot.bar();
 ```
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/phi-grib/comptox_analysis/blob/main/images/importances.PNG" alt="Cover Page">
+  <img src="https://raw.githubusercontent.com/phi-grib/comptox_analysis/main/images/importances.PNG" alt="Cover Page">
 </p>
 
 ##### you can render the image of whatever compound using ```render_image``` function:
@@ -74,7 +74,7 @@ highlighter_instance.fragmentation(n=26,number=1)[0]
 ```
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/phi-grib/comptox_analysis/main/images/fragments.PNG" alt="Cover Page">
+  <img src="https://raw.githubusercontent.com/phi-grib/comptox_analysis/main/images/frag..PNG" alt="Cover Page">
 </p>
 
 ##### And now, using ```highlighting``` function, you will observe the fragments that you want to highlight (the package supports both, rdkit and morgan fingerprints):
