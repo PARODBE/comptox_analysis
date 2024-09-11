@@ -113,7 +113,7 @@ highlighter_instance.highlighting(type='morgan',fingerprint_numbers=[[1300]])
   <img src="https://raw.githubusercontent.com/phi-grib/comptox_analysis/main/images/one_compound_highl..PNG" alt="Cover Page">
 </p>
 
-Also, it is possible to highlight multiple compounds (in this case we are highlighting the selected fingerprints as an example9:
+Also, it is possible to highlight multiple compounds (in this case we are highlighting the selected fingerprints as an example):
 
 ```python
 
