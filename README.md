@@ -18,9 +18,12 @@ comptox_analysis requires:
 - numpy
 - pandas
 
+_ _ _
 
+## User installation
 
-##### Install comptox_analysis from PyPI
+The easiest way to install comptox_analysis is using ```pip```:
+
 ```bash
 pip install comptox_analysis
 ```
