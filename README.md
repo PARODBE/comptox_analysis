@@ -7,7 +7,7 @@ In January 2024, I defended my doctoral thesis in computational toxicology, and 
 
 ### Installation
 
-_ _
+_ _ _ _
 
 
 ##### Install comptox_analysis from PyPI
