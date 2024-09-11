@@ -57,19 +57,21 @@ class highlighter:
         n = Number of fragments
         number = Mol number, if you have only one, put 0
         '''
+
+        mol = self.mol[number]
+
         if type == 'morgan':
             tpls_list = []
 
-            for mol in self.mol:
-                bi = {}
-                if hyper_finger is None:
-                    fp = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, radius=2, bitInfo=bi, useFeatures=True)
-                else:
-                    fp = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, bitInfo=bi, **hyper_finger)
+            bi = {}
+            if hyper_finger is None:
+                fp = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, radius=2, bitInfo=bi, useFeatures=True)
+            else:
+                fp = rdMolDescriptors.GetMorganFingerprintAsBitVect(mol, bitInfo=bi, **hyper_finger)
 
-                tpls = [(mol, x, bi) for x in fp.GetOnBits()]
-                self.bi_list.append(bi)
-                tpls_list.append(tpls)
+            tpls = [(mol, x, bi) for x in fp.GetOnBits()]
+            self.bi_list.append(bi)
+            tpls_list.append(tpls)
 
             img = Draw.DrawMorganBits(tpls_list[number][:n], molsPerRow=4, legends=[str(x) for x in fp.GetOnBits()][:n])
             return (img, self.bi_list[number])
@@ -78,16 +80,15 @@ class highlighter:
             
             tpls_list = []
 
-            for mol in self.mol:
-                rdkbi = {}
-                if hyper_finger is None:
-                    fp = Chem.RDKFingerprint(mol, maxPath=5, bitInfo=rdkbi)
-                else:
-                    fp = Chem.RDKFingerprint(mol, bitInfo=rdkbi, **hyper_finger)
+            rdkbi = {}
+            if hyper_finger is None:
+                fp = Chem.RDKFingerprint(mol, maxPath=5, bitInfo=rdkbi)
+            else:
+                fp = Chem.RDKFingerprint(mol, bitInfo=rdkbi, **hyper_finger)
 
-                tpls = [(mol, x, rdkbi) for x in rdkbi]
-                self.bi_list.append(rdkbi)
-                tpls_list.append(tpls)
+            tpls = [(mol, x, rdkbi) for x in rdkbi]
+            self.bi_list.append(rdkbi)
+            tpls_list.append(tpls)
 
             if n is None or n > len(tpls_list[number]):
                 n = len(tpls_list[number])
