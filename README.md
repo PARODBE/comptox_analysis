@@ -9,6 +9,15 @@ In January 2024, I defended my doctoral thesis in computational toxicology, and 
 
 ## Dependencies
 
+comptox_analysis requires:
+
+- rdkit=2023.09.6
+- bokeh=3.1.1
+- scikit-learn
+- matplotlib
+- numpy
+- pandas
+
 
 
 ##### Install comptox_analysis from PyPI
