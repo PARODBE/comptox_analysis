@@ -28,7 +28,11 @@ The easiest way to install comptox_analysis is using ```pip```:
 pip install comptox_analysis
 ```
 
-##### Now, you have to import some python libraries and building a random forest to obtain feature importances
+_ _ _
+
+# Example of Usage for Interpretability using highlighter
+
+Imagine you obtain the feature importance, which in this case are fingerprints, using a ML or DL model, and you want to highlight the most important fingerprints for each molecule. To carry out this task, we first load the necessary libraries and the dataset, build a Random Forest model as an example, and then extract the feature importance. 
 
 ```python
 # Import library
@@ -62,7 +66,7 @@ imp[:10].plot.bar();
   <img src="https://raw.githubusercontent.com/phi-grib/comptox_analysis/main/images/importances.PNG" alt="Cover Page">
 </p>
 
-##### you can render the image of whatever compound using ```render_image``` function:
+We are going to select compounds with two of the ten most important variables (in this case, we obtain a list with three compounds). Now, we render the image of the first compound using ```render_image``` function:
 
 ```python
 
@@ -74,7 +78,7 @@ mols=df.loc[indexes,'Smiles'].tolist()
 
 highlighter_instance=highlighter(mols)
 
-highlighter_instance.render_image(number=1,indexes=False)
+highlighter_instance.render_image(number=0,indexes=False)
 
 ```
 
@@ -83,11 +87,11 @@ highlighter_instance.render_image(number=1,indexes=False)
 </p>
 
 
-##### Also, you can visualize molecular fragments using ```fragmentation``` function:
+Also, you can visualize molecular fragments using ```fragmentation``` function:
 
 ```python
 
-highlighter_instance.fragmentation(n=26,number=1)[0]
+highlighter_instance.fragmentation(n=26,number=0)[0]
 
 ```
 
@@ -95,13 +99,13 @@ highlighter_instance.fragmentation(n=26,number=1)[0]
   <img src="https://raw.githubusercontent.com/phi-grib/comptox_analysis/main/images/frag..PNG" alt="Cover Page">
 </p>
 
-##### And now, using ```highlighting``` function, you will observe the fragments that you want to highlight (the package supports both, rdkit and morgan fingerprints):
+And now, using ```highlighting``` function, you will be able to observe the fragments that you want to highlight (the package supports both, rdkit and morgan fingerprints):
 
 ```python
 
-highlighter_instance = highlighter([mols[1]])
+highlighter_instance = highlighter([mols[0]])
 
-highlighter_instance.highlighting(type='morgan',fingerprint_numbers=[[576,779]])
+highlighter_instance.highlighting(type='morgan',fingerprint_numbers=[[1300]])
 
 ```
 
@@ -109,7 +113,7 @@ highlighter_instance.highlighting(type='morgan',fingerprint_numbers=[[576,779]])
   <img src="https://raw.githubusercontent.com/phi-grib/comptox_analysis/main/images/one_compound_highl..PNG" alt="Cover Page">
 </p>
 
-##### Also, it is possible to highlight multiple compounds:
+Also, it is possible to highlight multiple compounds (in this case we are highlighting the selected fingerprints as an example9:
 
 ```python
 
