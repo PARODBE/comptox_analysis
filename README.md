@@ -61,7 +61,7 @@ highlighter_instance.render_image(number=1,indexes=False)
 ```
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/phi-grib/comptox_analysis/main/images/molecule_render..PNG" alt="Cover Page">
+  <img src="https://raw.githubusercontent.com/phi-grib/comptox_analysis/main/images/molecule_rend..PNG" alt="Cover Page">
 </p>
 
 
