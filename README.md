@@ -123,8 +123,21 @@ highlighter_instance = highlighter(mols)
 
 highlighter_instance.highlighting(fingerprint_numbers=[[576,779],[576,779],[576,779]])
 
+
 ```
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/phi-grib/comptox_analysis/main/images/multiple_highl..PNG" alt="Cover Page">
 </p>
+
+
+_ _ _
+
+# Example of Usage for chemical space visualization
+
+
+```python
+
+plotter = chemical_space_plotter('cox2_train.sdf', 'cox2_test.sdf')
+plotter.visualizer(type='molecular_descriptor', test=True, Save=True)
+```
