@@ -135,9 +135,24 @@ _ _ _
 
 # Example of Usage for chemical space visualization
 
+Another option which is included in this library is visualize the chemical space. It is supported the use of three kind of descriptor:
+
+- molecular descriptor: Mollogp, molweight... (207 variables)
+- Morgan fingerprints
+- Rdkit fingerprints
+
+If you select molecular descriptor, a Bokeh plot will display the results of a PCA. For any type of fingerprint, a parametric t-SNE is constructed, where the t-SNE output is trained using an MLPRegressor. With just one line of code, you can generate an interactive HTML visualization of the chemical space, including molecular structures that appear when hovering over each scatter point. 
+
+Both training and test sets can be visualized (if applicable), and the points on the graph can be color-coded according to the class each compound belongs to, supporting multi-class classification problems. Additionally, you can deselect compounds from specific classes by clicking on the corresponding legend in the plot.
 
 ```python
 
 plotter = chemical_space_plotter('cox2_train.sdf', 'cox2_test.sdf')
 plotter.visualizer(type='molecular_descriptor', test=True, Save=True)
 ```
+
+Here, you can visualize an example: 
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/PARODBE/comptox_analysis/main/images/chemical_space.png" alt="Cover Page">
+</p>
