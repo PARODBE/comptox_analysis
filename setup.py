@@ -7,7 +7,7 @@ with open("README.md", 'r') as f:
 
 setup(
     name='comptox_analysis',
-    version='0.9',
+    version='1.0',
     description='ML analysis',
     license='GNU',
     long_description=long_description,
