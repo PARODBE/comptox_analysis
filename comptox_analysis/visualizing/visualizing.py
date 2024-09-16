@@ -25,28 +25,24 @@ from bokeh.palettes import Category20
 from typing import Tuple, List, Dict
 
 class chemical_space_plotter:
-    
-    def __init__(self,path:str=None):
 
+    def __init__(self, path: str = None, test_path: str = None):
         '''
-        This library allows to draw the chemical space for a specific dataset, providing structure chemical information.
+        This library allows drawing the chemical space for a specific dataset, providing structure chemical information.
 
-        ----
+        path corresponds to training set path and test_path to the test series.
+
+        ----------------
 
         Example of use:
-        
-        chemical_space_plotter('cox2_train.sdf').visualizer(type='morgan',ID_column='pchembl_value')
-        
+        chemical_space_plotter('train.sdf', 'test.sdf').visualizer(type='morgan', ID_column='pchembl_value', test=True)
         '''
-        
-        self.df=PandasTools.LoadSDF(path,smilesName='Smiles',includeFingerprints=True,molColName='Structure')
+
+        self.df = PandasTools.LoadSDF(path, smilesName='Smiles', includeFingerprints=True, molColName='Structure')
+        self.df_test = PandasTools.LoadSDF(test_path, smilesName='Smiles', includeFingerprints=True, molColName='Structure') if test_path else None
 
     def _prepareMol(self, mol, kekulize):
-
-        '''
-        The objective of this function consists of preparing a molecule for visual representation by performing specific preprocessing steps
-        '''
-        
+        '''Prepare a molecule for visual representation by performing specific preprocessing steps.'''
         mc = Chem.Mol(mol.ToBinary())
         if kekulize:
             try:
@@ -57,86 +53,128 @@ class chemical_space_plotter:
             rdDepictor.Compute2DCoords(mc)
         return mc
 
-    def moltosvg(self, mol,molSize=(450,200),kekulize=True,drawer=None,**kwargs):
-
-        '''
-        The previous function is applied in moltosvg for visual representation of the different compounds.
-        '''
-        
-        mc = self._prepareMol(mol,kekulize)
+    def moltosvg(self, mol, molSize=(450, 200), kekulize=True, drawer=None, **kwargs):
+        '''Convert molecules into SVG format for visual representation.'''
+        mc = self._prepareMol(mol, kekulize)
         if drawer is None:
-            drawer = rdMolDraw2D.MolDraw2DSVG(molSize[0],molSize[1])
-        drawer.DrawMolecule(mc,**kwargs)
+            drawer = rdMolDraw2D.MolDraw2DSVG(molSize[0], molSize[1])
+        drawer.DrawMolecule(mc, **kwargs)
         drawer.FinishDrawing()
         svg = drawer.GetDrawingText()
-        
-        return SVG(svg.replace('svg:',''))
+        return SVG(svg.replace('svg:', ''))
 
     def generate_colors(self, num_colors):
-
-        '''
-        This function generates different colors for the different classes.
-        '''
-        
-        palette = Category20[20]  # Usar una paleta con 20 colores
+        '''Generate a set of distinct colors for different classes.'''
+        palette = Category20[20]
         color_cycle = cycle(palette)
         colors = [next(color_cycle) for _ in range(num_colors)]
-        
         return colors
 
-    def visualizer(self,type = 'morgan', hyp_fp : Dict = None, activity_column='Activity', ID_column=None):
-
+    def visualizer(self, type='morgan', hyp_fp: Dict = None, activity_column='Activity', ID_column=None, test=False, Save=False, path='chemical_space_plot.html'):
         '''
-        With this function you can visualize the chemical space of the selected dataframe. To complete this task you must select the type of
-        descriptors --> molecular_descriptor (with the 208 rdkit variables), morgan and rdkit fingerprints. For the fingerprints you can specify the 
-        different hyperparameters.
-        Also, you must select the name of your activity_column and finally, an ID_column.
+        Visualize the chemical space of a dataset. If in type you select molecular_descriptor a PCA is built, however if you select morgan or rdkit a parametric TSNE is built training the TSNE output with a MLPRegressor. 
+        hyp_fp allows to select the hyperparameters for the fingerprint generation.
+        activity column corresponds to the name of the output variable. ID_column can be the molecule names or even pchembl_value. It is possible
+        to save the HTML specifying Save option as True (if you want, specify the path). If test=True, a separate test set will also be visualized.
         '''
+        # Load the training set
+        mols_train = [Chem.MolFromSmiles(m) for m in self.df.Smiles]
+        y_train = self.df[activity_column]
 
-        mols=[Chem.MolFromSmiles(m) for m in self.df.Smiles]
-        y=self.df[activity_column]
+        if hyp_fp is None:
+            if type == 'morgan':
+                hyp_fp = {'radius': 2, 'nBits': 1024, 'useFeatures':True}  # Valores por defecto para Morgan fingerprints
+            elif type == 'rdkit':
+                hyp_fp = {'maxPath':2, 'fpSize': 2048}  # Valores por defecto para RDKit fingerprints
 
-        if type=='molecular_descriptor':
-            
-            df_molecular_descriptors=pd.DataFrame([Descriptors.CalcMolDescriptors(m) for m in mols])
-            sc=StandardScaler().fit(df_molecular_descriptors)
-            X_desc_sc=sc.transform(df_molecular_descriptors)
-            emb=PCA(n_components=2,random_state=46).fit_transform(X_desc_sc)
+        if type == 'molecular_descriptor':
+            df_molecular_descriptors_train = pd.DataFrame([Descriptors.CalcMolDescriptors(m) for m in mols_train])
+            sc = StandardScaler().fit(df_molecular_descriptors_train)
+            X_train_sc = sc.transform(df_molecular_descriptors_train)
+            emb = PCA(n_components=2, random_state=46).fit(X_train_sc)
+            emb_train = emb.transform(X_train_sc)
 
-        elif type=='morgan':
+        elif type == 'morgan':
+            X_fp_train = np.array([AllChem.GetMorganFingerprintAsBitVect(mol, **hyp_fp) for mol in mols_train])
+            emb = PredictableTSNE(estimator=MLPRegressor(random_state=46), transformer=TSNE(random_state=46)).fit(X_fp_train, y_train)
+            emb_train = emb.transform(X_fp_train)
 
-            X_fp_morgan=np.array([AllChem.GetMorganFingerprintAsBitVect(mol,**hyp_fp) for mol in 
-                                  [Chem.MolFromSmiles(m) for m in list(self.df.Smiles)]])
-            emb = PredictableTSNE(estimator=MLPRegressor(random_state=46), transformer=TSNE(random_state=46) ).fit_transform(X_fp_morgan,y)
-            
-        elif type=='rdkit':
+        elif type == 'rdkit':
+            X_fp_train = np.array([AllChem.RDKFingerprint(mol, **hyp_fp) for mol in mols_train])
+            emb = PredictableTSNE(estimator=MLPRegressor(random_state=46), transformer=TSNE(random_state=46)).fit(X_fp_train, y_train)
+            emb_train = emb.transform(X_fp_train)
 
-            X_fp_rdkit = np.array([AllChem.RDKFingerprint(mol,**hyp_fp) for mol in [Chem.MolFromSmiles(m) for m in list(self.df.Smiles)]])
-            emb = PredictableTSNE(estimator=MLPRegressor(random_state=46), transformer=TSNE(random_state=46) ).fit_transform(X_fp_rdkit,y)
+        # Convert training embeddings to a DataFrame
+        df_train_emb = pd.DataFrame(np.c_[emb_train, y_train], index=self.df.index.values, columns=['dim_1', 'dim_2', 'Activity'])
 
-            
-        df_emb = pd.DataFrame(np.c_[emb, y], index=self.df.index.values, columns=['dim_1', 'dim_2', 'Activity'])
-        unique_activities = y.unique()
-        class_mols = {activity: [Chem.MolFromSmiles(smiles) for smiles in self.df[self.df[activity_column] == activity]['Smiles']] for activity in unique_activities}
-        class_svgs = {activity: [self.moltosvg(mol).data for mol in mols] for activity, mols in class_mols.items()}
+        # Test set processing (if test=True and a test dataframe is provided)
+        if test and self.df_test is not None:
+            mols_test = [Chem.MolFromSmiles(m) for m in self.df_test.Smiles]
+            y_test = self.df_test[activity_column]
+
+            if type == 'molecular_descriptor':
+                df_molecular_descriptors_test = pd.DataFrame([Descriptors.CalcMolDescriptors(m) for m in mols_test])
+                X_test_sc = sc.transform(df_molecular_descriptors_test)
+                emb_test = emb.transform(X_test_sc)
+
+            elif type == 'morgan':
+                X_fp_test = np.array([AllChem.GetMorganFingerprintAsBitVect(mol, **hyp_fp) for mol in mols_test])
+                emb_test = emb.transform(X_fp_test)
+
+            elif type == 'rdkit':
+                X_fp_test = np.array([AllChem.RDKFingerprint(mol, **hyp_fp) for mol in mols_test])
+                emb_test = emb.transform(X_fp_test)
+
+            # Convert test embeddings to a DataFrame
+            df_test_emb = pd.DataFrame(np.c_[emb_test, y_test], index=self.df_test.index.values, columns=['dim_1', 'dim_2', 'Activity'])
+
+            # Asignar un color único al conjunto de test (diferente de los colores de las clases)
+            test_color = '#0000FF'  # Azul
+
+        # Create graphical representation for training set
+        unique_activities_train = y_train.unique()
+        class_mols_train = {activity: [Chem.MolFromSmiles(smiles) for smiles in self.df[self.df[activity_column] == activity]['Smiles']] for activity in unique_activities_train}
+        class_svgs_train = {activity: [self.moltosvg(mol).data for mol in mols] for activity, mols in class_mols_train.items()}
         
-        sources = {}
-        for activity in unique_activities:
-            subset = df_emb[df_emb['Activity'] == activity]
-            svgs = class_svgs[activity]
-            id_values = list(self.df.loc[self.df.index.isin(subset.index)][ID_column])
-            descriptions = [f'{ID_column}={value}' for value in id_values]
-            sources[activity] = ColumnDataSource(data=dict(
-                x=subset['dim_1'],
-                y=subset['dim_2'],
-                desc=descriptions,
-                svgs=svgs
+        sources_train = {}
+        for activity in unique_activities_train:
+            subset_train = df_train_emb[df_train_emb['Activity'] == activity]
+            svgs_train = class_svgs_train[activity]
+            if ID_column:
+                id_values_train = list(self.df.loc[self.df.index.isin(subset_train.index)][ID_column])
+                descriptions_train = [f'{ID_column}={value}' for value in id_values_train]  # No rounding for non-float IDs
+            else:
+                descriptions_train = [''] * len(subset_train)
+            sources_train[activity] = ColumnDataSource(data=dict(
+                x=subset_train['dim_1'],
+                y=subset_train['dim_2'],
+                desc=descriptions_train,
+                svgs=svgs_train
+            ))
+    
+        # Process the test set if it exists
+        if test and self.df_test is not None:
+            # Create SVGs for the test set
+            svgs_test = [self.moltosvg(mol).data for mol in mols_test]
+            
+            # Create ColumnDataSource for the test set
+            if ID_column:
+                id_values_test = list(self.df_test[ID_column])
+                descriptions_test = [f'{ID_column}={value}' for value in id_values_test]  # No rounding for non-float IDs
+            else:
+                descriptions_test = [''] * len(df_test_emb)
+            source_test = ColumnDataSource(data=dict(
+                x=df_test_emb['dim_1'],
+                y=df_test_emb['dim_2'],
+                desc=descriptions_test,
+                svgs=svgs_test
             ))
 
-        if len(unique_activities) == 2:
-            colors = ['#00FF00', '#FF0000']  # Verde y Rojo
+        # Colors for training set class
+        if len(unique_activities_train) == 2:
+            colors_train = ['#00FF00', '#FF0000']  # Verde y Rojo
         else:
-            colors = self.generate_colors(len(unique_activities))
+            colors_train = self.generate_colors(len(unique_activities_train))
 
         hover = HoverTool(tooltips="""
             <div>
@@ -153,10 +191,20 @@ class chemical_space_plotter:
             y_axis_label='Dimension 2'
         )
 
-        for activity, color in zip(unique_activities, colors):
-            interactive_map.circle('x', 'y', size=15, source=sources[activity], fill_alpha=0.2, color=color, legend_label=f'Class {activity}')
+        # training set points
+        for activity, color in zip(unique_activities_train, colors_train):
+            interactive_map.circle('x', 'y', size=15, source=sources_train[activity], fill_alpha=0.2, color=color, legend_label=f'Class {activity}')
+
+        # plot test set if exhist
+        if test and self.df_test is not None:
+            test_color = '#0000FF'  # Azul para el conjunto de test
+            interactive_map.circle('x', 'y', size=15, source=source_test, fill_alpha=0.2, color=test_color, legend_label='Test set')
 
         interactive_map.legend.location = "top_right"
         interactive_map.legend.click_policy = "hide"
 
-        show(interactive_map)
+        if Save:
+            output_file(path)
+            save(interactive_map)
+        else:
+            show(interactive_map)
