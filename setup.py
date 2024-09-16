@@ -14,6 +14,6 @@ setup(
     long_description_content_type='text/markdown',
     author='Pablo Rodríguez Belenguer',
     author_email='parodbe@gmail.com',
-    url='https://github.com/phi-grib/comptox_analysis',
-    download_url='https://github.com/phi-grib/comptox_analysis',
+    url='https://github.com/PARODBE/comptox_analysis',
+    download_url='https://github.com/PARODBE/comptox_analysis',
     packages=find_packages())
